@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example 1 for The WWW as a Rube Goldberg machine</title>
+</head>
+<body>
+    <button role="button" id="initTrigger">START!</button>
+    <section id="cocktailSection"></section>
+    <section id="NASAimage"></section>
+
+
+    <script>
+        let triggerButton = document.getElementById('initTrigger')
+        let cocktailSection = document.getElementById('cocktailSection')
+        const NASAsection = document.getElementById('NASAimage')
+
+        const randomCocktailURL = "https://www.thecocktaildb.com/api/json/v1/1/random.php"
+
+        const nasaAPODurl = "https://api.nasa.gov/planetary/apod"
+        const nasaAPIkey = "api_key=K6wdzoiug2GOIbcFBNjnYVvDHTgSAHMrCKQo9EKR"
+        const nasaDate = "date=2003-10-29"
+
+        const fetchCocktailData = () => {
+            //console.log('fetching!')
+
+            fetch(randomCocktailURL)
+                .then((payload) =>  payload.json() )
+                .then((data) => appendCocktailData(data))
+
+        }
+
+        const appendCocktailData = (data) => {
+            //console.log(data)
+
+            const myRandom = parseInt(Math.random()*data.drinks.length)
+
+            const firstDrink = data.drinks[myRandom]
+            const drinkName = firstDrink.strDrink
+            const drinkImg = firstDrink.strDrinkThumb
+
+            const nameHeader = document.createElement('h3')
+            nameHeader.innerText = "We had " + drinkName
+            cocktailSection.appendChild(nameHeader)
+
+            const image = document.createElement('img')
+            image.src = drinkImg
+            image.alt = "image of " + drinkName
+            cocktailSection.appendChild(image)
+
+            fetchNASAData()
+        }
+
+        const fetchNASAData = () => {
+            const fetchURL = nasaAPODurl+"?"+nasaAPIkey+"&"+nasaDate
+            fetch(fetchURL)
+                .then((payload) =>  payload.json() )
+                .then((json) => appendNASAData(json))
+        }
+
+        const appendNASAData = (data) => {
+            console.log(data)
+
+            const picTitle = data.title
+            const imgURL = data.url
+
+            const picHeader = document.createElement('h3')
+            picHeader.innerText = picTitle
+            NASAsection.appendChild(picHeader)
+
+            const nasaImg = document.createElement('img')
+            nasaImg.src = imgURL
+            nasaImg.alt = "the image of " + picTitle
+            NASAsection.appendChild(nasaImg)
+        }
+
+        triggerButton.addEventListener("click", fetchCocktailData)
+    </script>
+</body>
+</html>

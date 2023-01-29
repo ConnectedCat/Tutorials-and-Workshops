@@ -3,4 +3,4 @@
 
 **Table of contents**
 
-- The WWW as a Rube Goldberg machine
+- [The WWW as a Rube Goldberg machine](http://connectedcatmedia.com/Tutorials-and-Workshops/The_WWW_as_a_Rube_Goldberg_machine/)

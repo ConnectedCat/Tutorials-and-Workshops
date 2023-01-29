@@ -13,8 +13,8 @@
 
 
     <script>
-        let triggerButton = document.getElementById('initTrigger')
-        let cocktailSection = document.getElementById('cocktailSection')
+        const triggerButton = document.getElementById('initTrigger')
+        const cocktailSection = document.getElementById('cocktailSection')
         const NASAsection = document.getElementById('NASAimage')
 
         const randomCocktailURL = "https://www.thecocktaildb.com/api/json/v1/1/random.php"
@@ -24,20 +24,16 @@
         const nasaDate = "date=2003-10-29"
 
         const fetchCocktailData = () => {
-            //console.log('fetching!')
-
             fetch(randomCocktailURL)
-                .then((payload) =>  payload.json() )
-                .then((data) => appendCocktailData(data))
+                .then((response) =>  response.json() )
+                .then((payload) => appendCocktailData(payload))
 
         }
 
         const appendCocktailData = (data) => {
-            //console.log(data)
+            console.log(data)
 
-            const myRandom = parseInt(Math.random()*data.drinks.length)
-
-            const firstDrink = data.drinks[myRandom]
+            const firstDrink = data.drinks[0]
             const drinkName = firstDrink.strDrink
             const drinkImg = firstDrink.strDrinkThumb
 

@@ -5,8 +5,160 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The WWW as a Rube Goldberg machine</title>
+
+    <style>
+        code, code pre {
+            background-color: #3e3e3e;
+            color: antiquewhite;
+        }
+
+        img {
+            max-width: 500px;
+        }
+    </style>
+
 </head>
 <body>
-    
+    <h1>The WWW as a Rube Goldberg machine</h1>
+
+    <p>The Web was built around the concept of requests and responses - a constant back and forth between a server on the Internet and a browser on your computer. As it grew and expanded the need arose to get exchange going not just between a person and a machine but among many machines.</p>
+    <p>A user initiates a single action - a click of a button, a text entry, a page scroll - and the browser triggers a chain of events, most of them hidden behind the veil of the Cloud, to pass around some data from one server to another, like a ball in a pinball machine. The data can be used to request other data, to trigger different responses from servers, to capture more data. It can be formatted, rearranged, displayed in different contexts, - juxtaposed with other data.</p>
+        
+    <p>In the spirit of <a href="https://en.wikipedia.org/wiki/Rube_Goldberg_machine" target="_blank" rel="noopener noreferrer">Rube Goldberg's fascination</a> with the mechanism over the end result - how can we build similar systems in the digital realm? What kind of data could be passed around? With services could be chained together to produce some unexpected outcomes? What would the triggers look like - and the end results? None of those need to be practical, efficient or even reasonable - the focus is on the celebration of the chains of events and the mechanisms that enable them.</p>
+
+
+    <h2>Example 1: Daisy-chaning fetch requests to APIs</h2>
+
+    <p>We will create a rudimentary example of how you can request some data from an API, append it to you Web page, then once this is done - request more data from another API and continue the process meant to invoke a Rube Goldberg machine.</p>
+    <p>The result should resemble this <a href="example1.html" target="_blank" rel="noopener noreferrer">example</a></p> 
+    <ol>
+        <li>
+            <p>We'll start by creating a basic HTML page. The example is simple enough that we don't need a complex file structure and everything will be done from one file. You can use a basic boilerplate HTML for the start: <a href="https://htmlboilerplates.com/" target="_blank" rel="noopener noreferrer">https://htmlboilerplates.com/</a></p>
+            <p>We need to trigger our chain of events, so add a button to serve as a trigger:</p>
+            <code>
+<pre>&lt;body&gt; 
+    &lt;button role=&quot;button&quot; id=&quot;initTrigger&quot;&gt;START!&lt;/button&gt; 
+&lt;/body&gt;</pre>
+            </code>
+
+            <p>We'll need to prepare some sections in the document to help us structure the content we'll be adding once we get it from the APIs, so let's add 2 sections. The rest of the work we'll do with JavaScript, so we'll add a script element into our document and start writing the rest of the content inside it.</p>
+            <code>
+<pre>&lt;body&gt; 
+    &lt;button role=&quot;button&quot; id=&quot;initTrigger&quot;&gt;START!&lt;/button&gt; 
+    &lt;section id=&quot;cocktailSection&quot;&gt;&lt;/section&gt; 
+    &lt;section id=&quot;NASAimage&quot;&gt;&lt;/section&gt;
+    &lt;script&gt; &lt;/script&gt;
+&lt;/body&gt;</pre>
+            </code>
+        </li>
+        <li>
+            <p>You might have guessed from the section IDs that the first API we'll use is a <a href="https://www.thecocktaildb.com/api.php" target="_blank" rel="noopener noreferrer">CocktailDB API</a> - a repository of recepies for alcoholic and non-alcoholic drinks. The sesond one will be one of APIs hosted by NASA called Astronomy Picture of The Day, or <a href="https://api.nasa.gov/" target="_blank" rel="noopener noreferrer">APOD</a></p>
+            <p>They have their diffirences, but the main similarity is that they both are easy to acces and return their results in JSON. <a href="https://www.json.org/json-en.html" target="_blank" rel="noopener noreferrer">JSON</a> is a data format - in fact, it's the most common data format on the Web (at least in 2023.) You can see what it looks like if you copy one of the example URLs from Cocktail DB - let's say this one: <a href="https://www.thecocktaildb.com/api/json/v1/1/random.php" target="_blank" rel="noopener noreferrer">www.thecocktaildb.com/api/json/v1/1/random.php</a> and open it in a new tab in your browser.</p>
+            <p>If you are using Firefox you will probably see something like the image below.</p>
+            <img src="img/JSONexample.png" alt="Example of formatted JSON data">
+            <p>In Chrome, without a built-in JSON formatting tool it will probably look different (see below). You can get a <a href="https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en" target="_blank" rel="noopener noreferrer">JSON prettifier</a> or just switch to Firefox!</p>
+            <img src="img/JSONexample2.png" alt="Example of unformatted JSON data">
+        </li>
+
+        <li>
+            <p>Now that we know what kind of data we can expect in return to our requests, and how to get them manually we can write a script to fetch those results for us. We'll move into our &lt;script&gt; and write some JavaScript to do that. First we'll need to create a reference to our button, so that we can track when it's clicked.</p>
+            <code>
+                const triggerButton = document.getElementById('initTrigger')
+            </code>
+            <p>Then we'll need to create an event listenter on that button, so that when the event we're looking for (a click on the button) happens - we'll trigger a function in response. The function we'll be triggering doesn't exist yet, but we'll create it afterwards add call it "fetchCocktailData"</p>
+            <code>
+                triggerButton.addEventListener("click", fetchCocktailData)
+            </code>
+            <p>Now we can make the function. We'll be using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank" rel="noopener noreferrer">JavaScript Fetch API</a> to make our requests to the servers. The main reason why we need to use it is because we don't know how much time the server we'll take to respond to us with the data we're looking for. We'll need to hold the execution of dependent functionality until we get the data and Fetch API will help us.</p>
+            <p>We'll fetch the data from a URL, then extract just the JSON payload, sans the headers and other metadata, and then we'll log the result into the browser concole to verify. The URL we'll is the same random cocktail URL and we'll store it in a constant for convenience. Here is what the contents of our &lt;script&gt; should look like now</p>
+            <code>
+<pre>
+const triggerButton = document.getElementById('initTrigger')
+
+const randomCocktailURL = "https://www.thecocktaildb.com/api/json/v1/1/random.php"
+
+const fetchCocktailData = () => {
+    fetch(randomCocktailURL)
+        .then((response) =>  response.json() )
+        .then((payload) => console.log(payload))
+}
+
+triggerButton.addEventListener("click", fetchCocktailData)</pre>
+            </code>
+            <p>If you launch your HTML file in a browser, open the console and click the "Start" button you should see a JSON payload very similar to what you saw whe you launched the URL in a browser tab.</p>
+        </li>
+
+        <li>
+            <p>Now that we have access to the data through our script we can add a function to parse the data and add it to our page instead of just logging it into the console. The data that comes in JSON format would consist of objects where data is stored in key-value pairs and arrays where data is stored under indices. To access data in an object we'll use object.key format and for the array we'll use array[index] format. To find which should be used we'll need to look closely at the structure of the data received - that's why logging it into the console is useful.</p>
+            <code>
+<pre>
+const appendCocktailData = (data) => {
+    console.log(data)
+
+    const firstDrink = data.drinks[0]
+    const drinkName = firstDrink.strDrink
+    const drinkImg = firstDrink.strDrinkThumb
+}</pre>
+            </code>
+            <p>To append the data we'll need to first create an element in the document, then add our data to its properties as required, and then append it to the appropriate section in the document. For that we'll also need to add the reference to that section - we can place it at the top of our script next to the reference to the button.</p>
+            <code>
+                <pre>
+const triggerButton = document.getElementById('initTrigger')
+const cocktailSection = document.getElementById('cocktailSection')</pre>
+            </code>
+            <p>The function 'appendCocktailData' should now look like this:</p>
+            <code>
+<pre>
+const appendCocktailData = (data) => {
+    console.log(data)
+
+    const firstDrink = data.drinks[0]
+    const drinkName = firstDrink.strDrink
+    const drinkImg = firstDrink.strDrinkThumb
+
+    const nameHeader = document.createElement('h3')
+    nameHeader.innerText = "We had " + drinkName
+    cocktailSection.appendChild(nameHeader)
+
+    const image = document.createElement('img')
+    image.src = drinkImg
+    image.alt = "image of " + drinkName
+    cocktailSection.appendChild(image)
+}</pre>
+            </code>
+            <p>We can now call this function once our data is fetched and parsed. The script should now look like this:</p>
+            <code>
+                <pre>
+const triggerButton = document.getElementById('initTrigger')
+const cocktailSection = document.getElementById('cocktailSection')
+
+const fetchCocktailData = () => {
+    fetch(randomCocktailURL)
+        .then((response) =>  response.json() )
+        .then((payload) => appendCocktailData(payload))
+
+}
+
+const appendCocktailData = (data) => {
+    console.log(data)
+
+    const firstDrink = data.drinks[0]
+    const drinkName = firstDrink.strDrink
+    const drinkImg = firstDrink.strDrinkThumb
+
+    const nameHeader = document.createElement('h3')
+    nameHeader.innerText = "We had " + drinkName
+    cocktailSection.appendChild(nameHeader)
+
+    const image = document.createElement('img')
+    image.src = drinkImg
+    image.alt = "image of " + drinkName
+    cocktailSection.appendChild(image)
+}
+
+triggerButton.addEventListener("click", fetchCocktailData)</pre>
+            </code>
+        </li>
+    </ol>
 </body>
 </html>

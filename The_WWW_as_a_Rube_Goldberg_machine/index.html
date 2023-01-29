@@ -100,7 +100,7 @@ const appendCocktailData = (data) => {
     const drinkImg = firstDrink.strDrinkThumb
 }</pre>
             </code>
-            <p>To append the data we'll need to first create an element in the document, then add our data to its properties as required, and then append it to the appropriate section in the document. For that we'll also need to add the reference to that section - we can place it at the top of our script next to the reference to the button.</p>
+            <p>To append the data we'll need to first create an element in the document, then add our data to its properties as required, and then append it to the apropriate section in the document. For that we'll also need to add the reference to that section - we can place it at the top of our script next to the reference to the button.</p>
             <code>
                 <pre>
 const triggerButton = document.getElementById('initTrigger')
@@ -158,6 +158,80 @@ const appendCocktailData = (data) => {
 
 triggerButton.addEventListener("click", fetchCocktailData)</pre>
             </code>
+        </li>
+
+        <li>
+            <p>Time to add the next link in our Rube Goldberg machine - a call to another API, this time NASA APOD. While CocktailDB API does not require any user accounts or other forms authentication, NASA encourages their API users to obtain their own authentication key. Doing so will expand the functinoality and does not cost anything, so it's not a bad idea. Go to <a href="https://api.nasa.gov/#signUp" target="_blank" rel="noopener noreferrer">https://api.nasa.gov/#signUp</a> and use your email to create your own key.</p>
+            <p>Then we need to figure our which URL to send our requests to to get the data we're looking for. If you open the details of <a href="https://api.nasa.gov/#browseAPI" target="_blank" rel="noopener noreferrer">APOD API</a> you will see that all requests should go to the same URL - <a href="https://api.nasa.gov/planetary/apod" target="_blank" rel="noopener noreferrer">https://api.nasa.gov/planetary/apod</a> but there is a set of query parameters that can be apended to the URL to modify your request. Those parameters include api_key, date, count and others. To add those parameters to the query we need to first add a ? after the URL and then separate each query parameter by an &. For example:</p>
+            <code>
+                https://api.nasa.gov/planetary/apod?api_key=YOUR_OWN_API_KEY&date=2003-10-29
+            </code>
+            <p>Some of these parameters might change so it helps to separate them in our code. We'll re-assemble them later when it's time to use them, but for now let's create a set of 3 constants: for the URL and for each of the query parameters, and pust if next to our cocktailDB URL constant:</p>
+            <code>
+                <pre>
+const nasaAPODurl = "https://api.nasa.gov/planetary/apod"
+const nasaAPIkey = "api_key=YOUR_OWN_API_KEY"
+const nasaDate = "date=2003-10-29"</pre>
+            </code>
+            <p>The date of October 29, 2003 is completely random, feel free to put any other one you like.</p>
+            <p>Now we can create a fetch function for the NASA API and we'll trigger it right after we're done appending the content from the CocktailDB. At the end of appendCocktailData add the call to fetchNASAData:</p>
+            <code>
+                <pre>
+    // other previous code here                
+    const image = document.createElement('img')
+    image.src = drinkImg
+    image.alt = "image of " + drinkName
+    cocktailSection.appendChild(image)
+    // ADD THIS LINE:
+    fetchNASAData()
+}</pre>
+            </code>
+            <p>Now lets create the fetchNASAData function. I put it right below the appendCocktailData function in the <a href="https://github.com/ConnectedCat/Tutorials-and-Workshops/blob/main/The_WWW_as_a_Rube_Goldberg_machine/example1.html" target="_blank" rel="noopener noreferrer">example</a> but you are welcome to organize your code as you prefer. The functionality is veryb similar to how we fetched the data from CocktailDB, the only thing we need to do first is to assemble the URL and the query parameters to get the right response.</p>
+            <code>
+<pre>
+const fetchNASAData = () => {
+    const fetchURL = nasaAPODurl+"?"+nasaAPIkey+"&"+nasaDate
+    fetch(fetchURL)
+        .then((payload) =>  payload.json() )
+        .then((json) => appendNASAData(json))
+}</pre>
+            </code>
+            <p>At the end of the fetching sequence, in the last "then" you will notice a call to a new function - appendNASAData. We have not made it yet, but from the previous example you might have guessed what it does. Let write it out.</p>
+        </li>
+
+        <li>
+            <p>Similar to CocktailDB we need to parse the data to extract just the components we need. Unfortunately, very API structures its responses differently, so we'll need to look at the data structure to figure out how to get to the specific values - remember that in an object we'll use object.key format and for the array we'll use array[index] format. Remember to console.log the data to see how it's structured.</p>
+            <p>After that we can create our document elements and put the data into their apropriate properties. Then we can append them to the section of our docuemnt allocated for NASA data - don't forget to include the reference for it at the top, ner the references to the button and the cocktail section:</p>
+            <code>
+                <pre>
+const triggerButton = document.getElementById('initTrigger')
+const cocktailSection = document.getElementById('cocktailSection')
+//NEW ONE:
+const NASAsection = document.getElementById('NASAimage')</pre>
+            </code>
+            <p>The whole appendNASAData function would look like this:</p>
+            <code>
+                <pre>        
+const appendNASAData = (data) => {
+    console.log(data)
+
+    const picTitle = data.title
+    const imgURL = data.url
+
+    const picHeader = document.createElement('h3')
+    picHeader.innerText = picTitle
+    NASAsection.appendChild(picHeader)
+
+    const nasaImg = document.createElement('img')
+    nasaImg.src = imgURL
+    nasaImg.alt = "the image of " + picTitle
+    NASAsection.appendChild(nasaImg)
+}</pre>
+            </code>
+        </li>
+        <li>
+            <p>This concludes the first example. You can continue adding for fecth*** and append*** function to this chain of events, and add additional content to construct a story around the data you are receiving. You can also use some data comonents of a previous response - like title or description - to server as query paremeters in the following fetch data requests.</p>
+            <p>You can see the entire example code <a href="https://github.com/ConnectedCat/Tutorials-and-Workshops/blob/main/The_WWW_as_a_Rube_Goldberg_machine/example1.html" target="_blank" rel="noopener noreferrer">here</a> and try in in action <a href="http://connectedcatmedia.com/Tutorials-and-Workshops/The_WWW_as_a_Rube_Goldberg_machine/example1.html" target="_blank" rel="noopener noreferrer">here</a>.</p>
         </li>
     </ol>
 </body>

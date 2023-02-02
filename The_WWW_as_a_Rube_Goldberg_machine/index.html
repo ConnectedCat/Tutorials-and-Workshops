@@ -187,11 +187,32 @@ const nasaDate = "date=2003-10-29"</pre>
     fetchNASAData()
 }</pre>
             </code>
+            <p>You could also create a version where you extract a piece of data from one API response and use it as a parameter for the next call. For example, we could take the date on on which the cocktail recepie was last modified and use it instead of our random date in the call to the NASA API. For that we'll need to make sure that the date also fits the format that the NASA API expects - you will typicaly find what it is in <a href="https://api.nasa.gov/#browseAPI" target="_blank" rel="noopener noreferrer">the API documentation.</a> Comparing the data we can see that the cocktail `dateModified` contains hours, minutes and seconds, while the NASA API expects just a year, month and day separated by dashes. one easy way to work around that is to convert `dateModified` into a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" target="_blank" rel="noopener noreferrer">JavaScript Date object</a> and then extract the year, month and day and re-assemble them via one of the string concatention methods. Notice that `fetchNASAData` function now takes an agrument and we're passing the formatted date to it.</p>
+            <code>
+                <pre>
+    cocktailSection.appendChild(image)
+
+    const a = new Date(firstDrink.dateModified)
+    const dateForNASAAPI = a.getUTCFullYear().toString()+"-"+(a.getUTCMonth()+1).toString()+"-"+a.getUTCDay()
+
+    fetchNASAData(dateForNASAAPI)
+}</pre>
+            </code>
             <p>Now lets create the fetchNASAData function. I put it right below the appendCocktailData function in the <a href="https://github.com/ConnectedCat/Tutorials-and-Workshops/blob/main/The_WWW_as_a_Rube_Goldberg_machine/example1.html" target="_blank" rel="noopener noreferrer">example</a> but you are welcome to organize your code as you prefer. The functionality is veryb similar to how we fetched the data from CocktailDB, the only thing we need to do first is to assemble the URL and the query parameters to get the right response.</p>
             <code>
 <pre>
 const fetchNASAData = () => {
     const fetchURL = nasaAPODurl+"?"+nasaAPIkey+"&"+nasaDate
+    fetch(fetchURL)
+        .then((payload) =>  payload.json() )
+        .then((json) => appendNASAData(json))
+}</pre>
+            </code>
+            <p>Or if you wanted to use a date supplied by another API response, you could pass the date as an argument to the function and then use that instead of pre-set constant `nasaDate`.</p>
+            <code>
+                <pre>
+const fetchNASAData = (picDate) => {
+    const fetchURL = nasaAPODurl+"?"+nasaAPIkey+"&"+"date="+picDate
     fetch(fetchURL)
         .then((payload) =>  payload.json() )
         .then((json) => appendNASAData(json))

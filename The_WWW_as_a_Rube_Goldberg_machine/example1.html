@@ -20,7 +20,7 @@
         const randomCocktailURL = "https://www.thecocktaildb.com/api/json/v1/1/random.php"
 
         const nasaAPODurl = "https://api.nasa.gov/planetary/apod"
-        const nasaAPIkey = "api_key=YOUR_OWN_API_KEY"
+        const nasaAPIkey = "api_key=DEMO_KEY"
         const nasaDate = "date=2003-10-29"
 
         const fetchCocktailData = () => {
@@ -46,11 +46,14 @@
             image.alt = "image of " + drinkName
             cocktailSection.appendChild(image)
 
-            fetchNASAData()
+            const a = new Date(firstDrink.dateModified)
+            const dateForNASAAPI = a.getUTCFullYear().toString()+"-"+(a.getUTCMonth()+1).toString()+"-"+a.getUTCDay()
+
+            fetchNASAData(dateForNASAAPI)
         }
 
-        const fetchNASAData = () => {
-            const fetchURL = nasaAPODurl+"?"+nasaAPIkey+"&"+nasaDate
+        const fetchNASAData = (picDate) => {
+            const fetchURL = nasaAPODurl+"?"+nasaAPIkey+"&"+"date="+picDate
             fetch(fetchURL)
                 .then((payload) =>  payload.json() )
                 .then((json) => appendNASAData(json))

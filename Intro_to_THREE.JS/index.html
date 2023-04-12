@@ -78,6 +78,87 @@
             <code>npm run dev</code>
             <p>again to restart the Vite server.</p>
         </li>
+        <li>
+            <p>Next we'll need to import the Three.JS module into our main.js file, we can do that right after the CSS import</p>
+            <code>
+                <pre>
+import './style.css'
+import * as THREE from 'three'    
+                </pre>
+            </code>
+            <p>With that we'll have access to all the components of the standard ThreeJS library. There are some additinal component that we will need to import, but they are already installed in out app folder (in the node_modules section).</p>
+            <p>With this we can implement the most basic scene in ThreeJS. We'll start by steeting up a data object for our window sizes - not strictly necessary, but it will come handy later. Then we'll create a scene and a camera and position the camera a bit up and a bit closer to us. Lastly we'll need to create a renderer that will render the graphics for us and append it to the HTML document.</p>
+            <code>
+                <pre>
+//scene size
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+//scene
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera( 75, sizes.width / sizes.height, 0.1, 1000 )
+camera.position.z = 5
+camera.position.y = 2
+
+//renderer
+const renderer = new THREE.WebGLRenderer()
+renderer.setSize( sizes.width, sizes.height )
+document.body.appendChild( renderer.domElement )
+                </pre>
+            </code>
+            <p>After this we can add some contents to our scene and render it. We'll add a cube - this will require a box geometry and we'll start wil a Basic material, although we'll switch to Standard material very soon. The geometry and the material will allow us to create a mesh which we'll add to our scene. The last step here will be to render our scene as seen through our camera.</p>
+            <code>
+                <pre>
+//scene contents
+const cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 )
+const cubeMaterial = new THREE.MeshBasicMaterial( { color: 0x48727f } )
+const cube = new THREE.Mesh( cubeGeometry, cubeMaterial )
+cube.position.y = 1
+
+scene.add( cube )
+
+renderer.render( scene, camera )                    
+                </pre>
+            </code>
+        </li>
+        <li>
+            <p>Let's add animation to our scene. We'll use a standard JavaScript animation technique which involves creating a function that will instruduce changes to our scene and then call itself again, thus repeating those changes. Just make sure to re-render the scene each time, so those increamental changes are visible. You can repace the renderer.render call with the following:</p>
+            <code>
+                <pre>
+//animation
+function draw() {
+    requestAnimationFrame( draw )
+
+    cube.rotation.x += 0.01
+    cube.rotation.y += 0.01
+
+    renderer.render( scene, camera )
+}
+draw()                    
+                </pre>
+            </code>
+            <p>Let's also add a bit of housekeeping. Right now if you resize your window the scene will remain whichever size it had when the window loaded. We can make it change the size to follow the size of the browser window. To do that we'll use the sizes data object we created earlier, and call updates on it every time the window is resized. This code can go at the end of your main.js file:</p>
+            <code>
+                <pre>
+window.addEventListener('resize', ()=>{
+    console.debug("resize")
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera aspect ratio
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update the renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+                </pre>
+            </code>
+        </li>
     </ol>
 </body>
 </html>

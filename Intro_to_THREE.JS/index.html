@@ -159,6 +159,86 @@ window.addEventListener('resize', ()=>{
                 </pre>
             </code>
         </li>
+        <li>
+            <p>You'll notice that the cube looks 2-dimensional and has no shadows. This is because we are using Basic Material and because there are no lights to give it dimensionality. Let's change that. We'll start by changing the material to MeshStandardMaterial:</p>
+            <code>
+                const cubeMaterial = new THREE.MeshStandardMaterial( { color: 0x48727f } )
+            </code>
+            <p>Then we can add some lights to the scene. We can put the code for lights anywhere, but I prefer to keep them near the general scene settings, near the camera and the renderer. We'll add two lights - an ambient light to simulate daylight, and a directional light to serve as an intentional source of light. The directional light will be places above and to the right.</p>
+            <code>
+                <pre>
+const ambientLight = new THREE.AmbientLight( 0x404040 ) // soft white light
+scene.add( ambientLight )
+
+const directionalLight = new THREE.DirectionalLight( 0xFFFFFF )
+directionalLight.position.set( 4, 8, 0 )
+scene.add( directionalLight )                    
+                </pre>
+            </code>
+        </li>
+    </ol>
+    <h2>Example 2: UI options</h2>
+    <p>The previous code should give you a basic starter scene from which you can build further but it lacks certain UI options that will make a 3D environment comfortable. We'll add the ability to move around the scene and control parameters of the objects and the environment to make interactions easier. We'll also add helpers to make it easier to visualise the positions of the scene elements.</p>
+    <ol>
+        <li>
+            <p>We'll start by adding Orbit Controlls to allow us to move around the scene. To do that we'll need to import an add-on from the ThreeJS library, set up the controls and make sure the changes are displayed during the animation rendering.</p>
+            <p>Start by adding the following line after the import declaration for ThreeJS itself.</p>
+            <code>
+                import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+            </code>
+            <p>Then we can instantiate the controlls. We can put this code anywhere, but I prefer to keep them near the general scene settings, near the camera and the renderer.</p>
+            <code>
+                const controls = new OrbitControls( camera, renderer.domElement )
+            </code>
+            <p>Then we will update the controlls to make sure the changes are reflected in the animation render. You can put this line after the cube rotation updates in the draw() function.</p>
+            <code>
+                controls.update()
+            </code>
+        </li>
+        <li>
+            <p>With the cube alone it is a little difficult to understand how the controls work, especially since the cube is positioned slightly above the scene center. We can help that by adding a 'floor' and an axisHelper - a set of three lines indication the orientation of the scene. For the floor we'll use plane and add it right after the cube. We'll need to rotate it to make it face up.</p>
+            <code>
+                <pre>
+const plane = new THREE.Mesh( new THREE.PlaneGeometry( 7, 5 ), new THREE.MeshStandardMaterial( { color: 0xf5ff9d, side: THREE.DoubleSide } ) )
+plane.rotation.set( -Math.PI * 0.5, 0, 0 )   
+
+scene.add( plane )                
+                </pre>
+            </code>
+            <p>The helper we can add near the Orbit Controls instantiation, but anywhere after the scene instantiation is fine, because we need to add it as an element to the scene:</p>
+            <code>
+                <pre>
+const axesHelper = new THREE.AxesHelper( 5 )
+scene.add( axesHelper )
+                </pre>
+            </code>
+            <p>We can also add a light helper to help us visualise how the light is positioned and directed. You can add the following code with the lights or with the helpers - but try to find a logic to the way you organize your code.</p>
+            <code>
+                <pre>
+const directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight, 5 )
+scene.add( directionalLightHelper )
+                </pre>
+            </code>
+            <p>This should make it easy to understand how the scene is set-up and we can remove the elements once we're done with the build.</p>
+        </li>
+        <li>
+            <p>During the build and experimentation it can be helpful to give yourself a quick way to tweak parameters, and we can do that with a simple pre-built GUI package. We'll need to install it with npm first, then import it to the file and then implement it. Start by switching to your terminal and quitting the Vite server by pressing 'q'. Then run 'npm install lil-gui' and restart your server when the installation is done with 'npm run dev'.</p>
+            <img src="img/Terminal3.png" alt="lil-gui installation process">
+            <p>To import it into your scene add the following after your Orbit Controls import:</p>
+            <code>
+                import GUI from 'lil-gui'
+            </code>
+            <p>We can then add instantiation for the gui object. I tend to keep with with other controls and helpers.</p>
+            <code>const gui = new GUI()</code>
+            <p>To add specific controls we need to add the following lines after the scene content - because the objects in the scene are references in the controls. We're adding the slider to change the horizontal position of the cube and two color pickers. There are plenty of other options in the lil-gui documentation.</p>
+            <code>
+                <pre>
+gui.add(cube.position, 'x').min(-5).max(5).step(0.1).name('Cube Position X')
+gui.addColor(cube.material, 'color').name('Cube Color')
+gui.addColor(plane.material, 'color').name('Plane Color')                    
+                </pre>
+            </code>
+        </li>
     </ol>
 </body>
 </html>

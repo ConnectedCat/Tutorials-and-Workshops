@@ -26,5 +26,53 @@
         <li><a href="https://nodejs.org/" target="_blank" rel="noopener noreferrer">Node.JS</a></li>
         <li><a href="https://lil-gui.georgealways.com/" target="_blank" rel="noopener noreferrer">lil-gui</a></li>
     </ul>
+
+    <h2>Example 1: Starter project</h2>
+    <p>We will create a basic example showing how a THREE.JS app is initiated, fundamental structure and some useful UI add-one.</p>
+    <p>The result should resemble </p>
+    <ol>
+        <li>
+            <p>Start by launching your Terminal (PowerShell on Windows.) Once it's running type in the command:</p>
+            <code>node --version</code>
+            <p>If you see a version number and it's higher than 14.0.0 - you'll be fine. If you get a response that amounts to "I don't know what you want from me!" you'll need to install NodeJS from their website: <a href="https://nodejs.org/en/" target="_blank" rel="noopener noreferrer">nodejs.org</a>. Grab the version recommended for the most users and proceed with the installation. Once it's finished it might not be a bad idea to restart your machine - just to make sure all the paths are updated. After that try launching Terminal (PowerShell on Windows) and running the command again.</p>
+            <code>node --version</code>
+            <p>You should see the version number now. Also run this command:</p>
+            <code>npm --version</code>
+            <p>You should see a number higher than 6.0.0 If you don't - consult this guide for details <a href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm" target="_blank" rel="noopener noreferrer">"Downloading and installing Node.js and npm"</a></p>
+            <p>If you think of a browser as a car NodeJS is the engine from that car, that has been extracted and packaged and can be installed in your garage (on your computer) to provide power to your tools. NPM is Node Package Manager, and it will help us manage and install new components for that engine. You ternimal (or PowerShell on Windows) should look something like this now:</p>
+            <img src="../The_WWW_as_a_Rube_Goldberg_machine/img/terminal1.png" alt="Terminal view with Node and NPM version commands">
+        </li>
+        <li>
+            <p>We'll need to create a simple Node-based Web application and run it in a local server to make sure that the requests to OpenAI API come from an HTTP host and not just a file in your filesystem. There are many ways of doing this - one of the simpler ones is to create an app with <a href="https://vitejs.dev/guide/#scaffolding-your-first-vite-project" target="_blank" rel="noopener noreferrer">Vite</a>, a scaffolding engine.</p>
+            <p>Before we create our app let's figure out where will we be building it. To find your current working directory run</p>
+            <code>pwd</code>
+            <p>command in your Terminal (or PowerShell on Windows.) This will print out the path. From there you can navigate to the directory where you'd like to build your app. For example, I prefer to keep my coding projects in the "Repositories" directory inside my user folder so to move there from my current personal user folder I will run a cd (change directory) command like this:</p>
+            <code>cd Repositories</code>
+            <p>Once there I will run a simple command to create a Vite-based web-app:</p>
+            <code>npm create vite@latest</code>
+            <p>and follow the prompts. I will name my project "openAIapiProject" and we'll be using vanilla JavaScript for this project. So my terminal will look like this:</p>
+            <img src="img/Terminal1.png" alt="Terminal view after the creation of a Vite template"/>
+        </li>
+        <li>
+            <p>Once you've created your web-app Vite will prompt you with 3 next steps: change to the newly created app directory (its name is the same as the name you gave your Vite project), install the packages necessary to run your app and then run it in a developer mode. After completing the first 2 steps your Terminal (or PowerShell) would look similar to this:</p>
+            <img src="img/Terminal2.png" alt="Terminal view showing Vite instructions 1 and 2">
+            <p>Now you should be ready to run your app. Run the third command (npm run dev) and your NodeJS server should start. If you press "h" for help you should be able to see this:</p>
+            <img src="../The_WWW_as_a_Rube_Goldberg_machine/img/terminal4.png" alt="Terminal view showing running Vite server">
+            <p>You can press 'o' to open the default page in your browser. Vite server will track any chages you make to your web-app and will restart this browser page the moment you save your changes to your file, which is neat. So check back here as you progress with your work.</p>
+        </li>
+        <li>
+            <p>Open the directory that Vite has created for your web-app in your code editor and you'll see that there are a lot of things there that we won't need. You can start deleting them</p>
+            <img src="../The_WWW_as_a_Rube_Goldberg_machine/img/ViteCleanup.png" alt="File structure view showing what to delete in Vite: public folder, counter.js and javascript.svg">
+            <p>You can also remove evrything from "style.css" and leave only one line in main.js, the first one:</p>
+            <code>
+                import './style.css'
+            </code>
+            <p>Save all your changes and check back with your browser - you should see a blank page instead of the default page you saw before. You can check on the resulting file structure <a href="https://github.com/ConnectedCat/Tutorials-and-Workshops/tree/main/The_WWW_as_a_Rube_Goldberg_machine/OpenAIApiExample" target="_blank" rel="noopener noreferrer">here</a>. The last thing we need to do in your Terminal is to instal openaiapi library for NodeJS. In your Terminal press 'q' to quit your Vite server and run</p>
+            <code>npm install openai</code>
+            <p>Once the installation has finished you can run</p>
+            <code>npm run dev</code>
+            <p>again to restart the Vite server.</p>
+        </li>
+    </ol>
 </body>
 </html>

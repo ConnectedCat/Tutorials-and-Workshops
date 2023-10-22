@@ -20,76 +20,21 @@
     </style>
 </head>
 <body>
-    <h1>Serial data from ESP32 with ArduinoIDE and receiving serial data in Processing, Unity and TouchDesigner</h1>
-    
-    <h2>Sending data</h2>
-    <p>Since our misrocontroller connects to a computer via a USB cable - USB stands for Universal Serial Bus - we can send and receive data via a USB cable using ESP32 microcontroller. In this example we'll use <a href="https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/overview" target="_blank" rel="noopener noreferrer">HUZZAH32 board from Adafruit</a>. You can program those boards using different methods and languages, but we'll focus on using <a href="https://www.arduino.cc/en/software" target="_blank" rel="noopener noreferrer">ArduinoIDE</a>, as per Adafruit instructions. Before you begin you need to make sure your Arduino IDE is setup for use with the HUZZAH32 boards, for more details and step-by-step instrucitons visit <a href="https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/using-with-arduino-ide" target="_blank" rel="noopener noreferrer">HUZZAH32 page on the Adafruit learning portal.</a> You can use this guide for other boards as well with small deviations for board-specific operations.</p>
-
-    <h3>Sending single data reading from Arduino IDE via serial</h3>
-    <p>We will start by connecting a potentiometer to your ESP32. We'll use a breadboard with a plugged-in HUZZAH32 and connect a potentiometer to pin A2.</p>
-    <img src="img/ESP32withPot.png" alt="Adafruit ESP32 plugged into a breadboard with a potentiometer connected to input A2" />
-    <p>We will need initialize the serial connection in the <code>setup()</code> function with a specific <a href="https://en.wikipedia.org/wiki/Baud" target="_blank" rel="noopener noreferrer">baud</a> rate - the rate of data transmission. It's not very important what that rate is as long as we are sending and recieving data on the same rate. Then we'll read the analog value coming from the A2 pin and send it off to the serial port on our computer via USB. We'll be using <code>println()</code> function because it will add a new line character after each printed statement, resulting in each print being on a separate line. We'll also a delay of 100 milliseconds to limit the number of prints to 10 times per seconds and avoid being overwhelemed by the flurry of information.</p>
-    <code>
-<pre>void setup() {
-    Serial.begin(9600);
-}
-    
-void loop() {
-    Serial.println(analogRead(A2));
-    delay(100);
-} </pre>
-    </code>
-    <p>Once you verify and upload this code to your ESP32 you should be able to open the Serail Monitor. Make sure the baud rate of your Serial Monitor matches the rate you specified in your code (9600 in our example) and you should be able to see the numbers change from 0 to 4095 as you move your potentiometer back and forth.</p>
-    <img src="" alt="Serial Monitor in ArduinoIDE showing data from HUZZAH32">
-
-    <h3>Sending multiple data readings from ArduinoIDE via serial</h3>
-    <p>We can send multipe values from our microcontroller concurrently, provided we have a consistent encoding schema for them. So far we've sent one numerical value and use an end-of-line (aka new line) character <code>⮑</code> to identify the end of transmission - which would also allow us to separate one value from the next. This time we'll read from 3 sensors - a potentiometer, a button and a photoresistor - and send those 3 values at once. We'll use the following encoding: The position of the value will tell us which sensor it is from. The value in the first position will be from the potentiometer, the second - from the button, and the third - from the photoresistor. We'll separate those values with a predetermined character. It's not important which character that is, but a <code>,</code> is a convention, so we'll use that. Finally, we'll use end-of-line character to specify the end of transmission and the characters that come after it will count as the next reading of the three sensors.</p>
-    <p>The breadboard will be configured as follows:</p>
-    <img src="img/ESP32withPotButtonPhoto.png" alt="Adafruit ESP32 plugged into a breadboard with a potentiometer, a button and a photoresistor connected." />
-    <p>In our code we'll use <code>print()</code> functions to add values to a single transmission, but at the end of it we'll use <code>println()</code> to add the end-of-line character and signify the end of the current transmission and the beginning of the new one.</p>
-    <code>
-<pre>#define POTENTIOMETER A2
-#define BUTTON 13
-#define PHOTORESISTOR A3
-
-void setup() {
-    Serial.begin(9600);
-}
-
-void loop() {
-    Serial.print(analogRead(POTENTIOMETER));
-    Serial.print(',');
-    Serial.print(digitalRead(BUTTON));
-    Serial.print(',');
-    Serial.println(analogRead(PHOTORESISTOR));
-    delay(100);
-}
-</pre>
-    </code>
-    <p>This way we have 3 values trasnferred separated by a ','. We encode which sensor the value came from in the position of the value in the transmission, and encode the end of transmission with the character <code>⮑</code>. If you open the Serial Monitor you should be able to see the corresponsing transmissions.</p>
-    <img src="" alt="Serial Monitor in ArduinoIDE showing 3 values separated by commas from HUZZAH32">
-
-
-    <h2>Receiving data</h2>
-    <p>Just like we were able to receive the data from the serial port using the Serial Monitor built into ArduinoIDE we can receive it with other application that have the capability. One important thing to remember is that only one application can be connected to a given serial port at a time. This means that if you are viewing the data with the Serial Monitor you won't be able to recieve it in, for example, Processing. You will need to close one connection to enable another.</p>
-
-    <h3>Receiving serial data in Processing</h3>
-    <p><a href="https://processing.org/" target="_blank" rel="noopener noreferrer">Processing</a> is a popular creative coding platform. It includes a <a href="https://processing.org/reference/libraries/serial/index.html" target="_blank" rel="noopener noreferrer">Serial communication library</a> and is capable of receiving serial data.To enable this functionality in your Processing sketch first you need to verify that the library is installed. This is typically true by default but if you see it missing you can install it via <a href="https://subscription.packtpub.com/book/game-development/9781849517942/1/ch01lvl1sec11/installing-libraries" target="_blank" rel="noopener noreferrer">Processing library manager</a>.</p>
-    <img src="img/ProcessingSerialLibraryInstalled.png" alt="dropdown window showing Serial library installed in Processing">
-    <p>To use the library we need to add it to our sketch. You can do that by clicking on the name of the library in the dropdown window - this will add the following line to the beginning of your sketch:</p>
-    <code><pre>import processing.serial.*;</pre></code>
-    <p>You can also add this line to your sketch manually.</p>
-    <p>We will use <code>serialEvent</code></p>
-    <h3>Receiving serial data in Unity</h3>
-    
-    <h3>Receiving serial data in TouchDesigner</h3>
+    <h1>Woring with Serial data in ArduinoIDE</h1>
+    <ol>
+        <li><a href="sending.html" target="_blank" rel="noopener noreferrer">Serial data from ESP32 with Arduino IDE</a></li>
+        <li><a href="recieving.html" target="_blank" rel="noopener noreferrer">Receiving serial data in Processing, Unity and TouchDesigner</a></li>
+        <li><a href="cloud.html" target="_blank" rel="noopener noreferrer">Saving and retrieving data from AdafruitIO cloud service</a></li>
+    </ol>
 
     <h2>Additional resources</h2>
     <ul>
-        <li><a href="https://www.arduino.cc/reference/en/language/functions/communication/serial/" target="_blank" rel="noopener noreferrer">Serial communication in Adafriut IO</a></li>
+        <li><a href="https://www.arduino.cc/reference/en/language/functions/communication/serial/" target="_blank" rel="noopener noreferrer">Serial communication in Arduino IDE</a></li>
         <li><a href="https://processing.org/reference/libraries/serial/index.html" target="_blank" rel="noopener noreferrer">Processing serial library documentation</a></li>
         <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.ports.serialport?view=dotnet-plat-ext-7.0" target="_blank" rel="noopener noreferrer">C# SerialPort Class</a></li>
         <li><a href="https://docs.derivative.ca/Serial_DAT" target="_blank" rel="noopener noreferrer">TouchDesigner SerialDAT</a></li>
+        <li><a href="https://io.adafruit.com/api/docs/#adafruit-io-http-api" target="_blank" rel="noopener noreferrer">AdafruitIO documentation</a></li>
+        <li><a href="https://adafruit.github.io/Adafruit_IO_Arduino/html/index.html" target="_blank" rel="noopener noreferrer">Adafruit IO Arduino Library</a></li>
     </ul>
 </body>
 </html>

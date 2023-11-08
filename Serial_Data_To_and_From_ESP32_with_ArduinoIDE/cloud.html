@@ -22,12 +22,82 @@
 <body>
     <h1>Sending and receiving data with ESP32 from AdafruitIO cloud service</h1>
     <p>If you need to send and recieve data with your ESP32, but cannot (or do not want to) use a USB serial connection you can upload and fetch data from a cloud service, like <a href="https://io.adafruit.com/" target="_blank" rel="noopener noreferrer">Adafruit IO</a></p>
+    <h4>Config.h file:</h4>
+<code>
+<pre>// You will find these on https://io.adafruit.com/
+#define IO_USERNAME  "YOUR_ADAFRUIT_IO_USERNAME"
+#define IO_KEY       "YOUR_ADAFRUIT_IO_PASSKEY"
 
-    h2>Additional resources</h2>
-    <ul>
-        <li><a href="https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/overview" target="_blank" rel="noopener noreferrer">Adafruit HUZZAH32 - ESP32 Feather Documentation</a></li>
-        <li><a href="https://io.adafruit.com/api/docs/#adafruit-io-http-api" target="_blank" rel="noopener noreferrer">Adafruit IO HTTP API Documentation</a></li>
-        <li><a href="https://adafruit.github.io/Adafruit_IO_Arduino/html/index.html" target="_blank" rel="noopener noreferrer">Adafruit IO Arduino Library Documentation</a></li>
-    </ul>
+//These will be your WiFi name and password
+//Don't forget to change them if you move to another network
+#define WIFI_SSID "WiFi_NETWORK_NAME"
+#define WIFI_PASS "WiFi_NETWORK_PASSWORD"
+
+#include "AdafruitIO_WiFi.h"
+
+AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);
+</pre>
+    </code>
+    <h4>ArduinoIDE code:</h4>
+    <code>
+<pre>#include "config.h"
+#define POTENTIOMETER A2
+
+//access my feed
+AdafruitIO_Feed *myfeed = io.feed("my_feed");
+//access other person's feed
+AdafruitIO_Feed *otherfeed = io.feed("other_feed", "otherPersonsUsername");
+
+bool other_value = false;
+
+void setup() {
+    // put your setup code here, to run once:
+    Serial.begin(115200);
+    while(! Serial);
+
+    Serial.print("Trying to connect to Adafruit IO:");
+    io.connect();
+
+    while(io.status() < AIO_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+    }
+    Serial.println();
+    Serial.println(io.statusText());
+
+    otherfeed->onMessage(handleMessage);
+}
+
+void loop() {
+    // put your main code here, to run repeatedly:
+    io.run();
+
+    float value = analogRead(POTENTIOMETER);
+
+    Serial.print("Sending this: ");
+    Serial.println(value);
+    myfeed->save(value);
+    
+    if(other_value){
+    digitalWrite(13, HIGH);
+    }
+    else {
+    digitalWrite(13, LOW);
+    }
+    delay(3000);
+}
+
+void handleMessage(AdafruitIO_Data *data){
+    Serial.print("Received: ");
+    Serial.println(data->value()); // data as text
+
+    if(data->toInt() > 2000){ // data as number
+    other_value = true;
+    }
+    else {
+    other_value = false;
+    }
+}</pre>
+    </code>
 </body>
 </html>

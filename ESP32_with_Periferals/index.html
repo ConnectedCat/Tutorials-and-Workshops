@@ -27,8 +27,10 @@
 <pre>#include <ESP32Servo.h>
 Servo SG92R;
 int pos = 0;
+
 // PWM is possible on all 18 GPIO pins
 int servoPin = 21;
+
 void setup() {
     // Allow allocation of all timers
     ESP32PWM::allocateTimer(0);
@@ -36,25 +38,27 @@ void setup() {
     ESP32PWM::allocateTimer(2);
     ESP32PWM::allocateTimer(3);
     // SG92R operating frequency is 50Hz
-    myservo.setPeriodHertz(50);
+    SG92R.setPeriodHertz(50);
     // min and max pusle width settings for SG92R are 500 to 2500 microseconds
-    myservo.attach(servoPin, 500, 2500);
+    SG92R.attach(servoPin, 500, 2500);
 
     Serial.begin(9600);
 }
+
 void loop() {
     for (pos = 0; pos <= 180; pos += 1) {  // goes from 0 degrees to 180 degrees
-        // in steps of 1 degree
-        myservo.write(pos);  // tell servo to go to position in variable 'pos'
-        Serial.println(pos);
-        delay(10);  // waits 10ms for the servo to reach the position
+    // in steps of 1 degree
+    SG92R.write(pos);  // tell servo to go to position in variable 'pos'
+    Serial.println(pos);
+    delay(10);  // waits 10ms for the servo to reach the position
     }
     for (pos = 180; pos >= 0; pos -= 1) {  // goes from 180 degrees to 0 degrees
-        myservo.write(pos);                  // tell servo to go to position in variable 'pos'
-        Serial.println(pos);
-        delay(10);  // waits 10ms for the servo to reach the position
+    SG92R.write(pos);                  // tell servo to go to position in variable 'pos'
+    Serial.println(pos);
+    delay(10);  // waits 10ms for the servo to reach the position
     }
 }
+        
 </pre>        
     </code>
 </body>

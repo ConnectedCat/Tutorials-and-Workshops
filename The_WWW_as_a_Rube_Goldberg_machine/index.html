@@ -308,29 +308,29 @@ const appendNASAData = (data) => {
         </li>
 
         <li>
-            <p>OpenAI API <strong>requires</strong> and API key, and has no demo or account-less options. You'll need to sign up for a free account with them and then head over to <a href="https://beta.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer">beta.openai.com/account/api-keys</a> to get your key. The good news is that you'll receive $18 in account credit with you can spend on your AI-related experiments. Each image generation will cost you 2-4 cents, so you should be ok for a bit.</p>
+            <p>OpenAI API <strong>requires</strong> and API key, and has no demo or account-less options. You'll need to sign up for a free account with them and then head over to <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">platform.openai.com/api-keys</a> to get your key. The good news is that you'll receive $18 in account credit with you can spend on your AI-related experiments. Each image generation will cost you 2-4 cents, so you should be ok for a bit.</p>
             <p>Open your main.js file in your web-app and add a new line after the CSS import</p>
             <code>
                 <pre>
 import './style.css'
-import { Configuration, OpenAIApi } from 'openai'</pre>
+import OpenAI from 'openai'</pre>
             </code>
-            <p>Then we'll create a simple configuration object consisting of just your API key and then and OpenAIApi object using that configuration:</p>
+            <p>Then we'll instantiate the OpenAI library with our API key. We have to add "dangerouslyAllowBrowser" set to "true" because we are storing our API key directly in the code and OpenAI developers consider it dangerous. For a different way to set up your API key you can refer to this docuemnt <a href="https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key" target="_blank" rel="noopener noreferrer">https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key</a>:</p>
             <code>
                 <pre>
-const config = new Configuration({
-    apiKey: "PUT_YOUR_API_KEY_HERE"
-})
-    
-const openai = new OpenAIApi(configuration)</pre>
+const openai = new OpenAI({ 
+    apiKey: "YOUR_API_KEY_HERE'",
+    dangerouslyAllowBrowser: true
+})</pre>
             </code>
-            <p>Now we can create a request for OpenAI API to generate an image for us using createImage method. There are other methods in the API that you can find <a href="https://beta.openai.com/docs/models/overview" target="_blank" rel="noopener noreferrer">here</a>. ChatGPT is coming soon! You  need to pass the prompt, the number of images we want generate and the image size - either 256x256, 512x512 or 1024x1024 pixels. Larger images cost more. The await command with work similarly to the FetchAPI functionality - it will halt the execution of the subsequent code until the request has been populated with the server's response.</p>
+            <p>Now we can create a request for OpenAI API to generate an image for us using createImage method. There are other methods in the API that you can find <a href="https://platform.openai.com/docs/models/overview" target="_blank" rel="noopener noreferrer">here</a>. ChatGPT is availableas well and DALL-E 2 and 3. You need to pass the prompt, the number of images we want generate and the image size - either 1024x1024, 1024x1792 or 1792x1024 pixels. Larger images cost more. The await command with work similarly to the FetchAPI functionality - it will halt the execution of the subsequent code until the request has been populated with the server's response.</p>
             <code>
                 <pre>
-const response = await openai.createImage({
+const response = await openai.images.generate({
+    model: "dall-e-3",
     prompt: "A cat wearing armor riding a TRex into battle",
-    n: 1, //number of images requested
-    size: "512x512",
+    n: 1,
+    size: "1024x1024",
 })</pre>
             </code>
             <p>After that we can console.log the response to review the data structure and use our previous knowledge of how to get to specific values (To access data in an object we'll use object.key format and for the array we'll use array[index] format.) We can then create an element in the document and append it to the body of the page to display to a viewer.</p>

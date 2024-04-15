@@ -22,9 +22,7 @@
 <body>
     <h1>Receiving serial data in Unity</h1>
 
-    <p>Just like we were able to receive the data from the serial port using the Serial Monitor built into ArduinoIDE we can receive it with other application that have the capability. One important thing to remember is that only one application can be connected to a given serial port at a time. This means that if you are viewing the data with the Serial Monitor you won't be able to recieve it in, for example, Processing. You will need to close one connection to enable another.</p>
-
-    <h3>Receiving serial data in Unity</h3>
+    <p>Just like we were able to receive the data from the serial port using the Serial Monitor built into ArduinoIDE we can receive it with other application that have the capability. One important thing to remember is that only one application can be connected to a given serial port at a time. This means that if you are viewing the data with the Serial Monitor you won't be able to recieve it in, for example, Unity. You will need to close one connection to enable the other.</p>
     <p><a href="https://unity.com/" target="_blank" rel="noopener noreferrer">Unity</a> is a popular game development platform. It uses C# as it's main programming language. C# included a powerful <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.ports" target="_blank" rel="noopener noreferrer">Serial communication library</a> and is capable of receiving serial data. To enable this functionality in Unity you must first make sure you're using the correct configuration. In the top menu bar go to Edit -> Project Settings and under Player -> Other settings find Api Compatibility Level and set it to .NET Framework.</p>
     <img src="img/UnityProjectConfig.png" alt="project settings window showing correct selection in Unity">
     <p>To receive serial data we'll need to create a script in Unity and attach it to a game object in the environment. At the top of the script we need to decalare that we'll be using a serial port connection by adding this line:</p>

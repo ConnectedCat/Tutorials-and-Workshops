@@ -20,11 +20,10 @@
     </style>
 </head>
 <body>
-    <h1>Receiving serial data in Processing, Unity and TouchDesigner</h1>
+    <h1>Receiving serial data in ProcessingIDE</h1>
 
-    <p>Just like we were able to receive the data from the serial port using the Serial Monitor built into ArduinoIDE we can receive it with other application that have the capability. One important thing to remember is that only one application can be connected to a given serial port at a time. This means that if you are viewing the data with the Serial Monitor you won't be able to recieve it in, for example, Processing. You will need to close one connection to enable another.</p>
+    <p>Just like we were able to receive the data from the serial port using the Serial Monitor built into ArduinoIDE we can receive it with other application that have the capability. One important thing to remember is that only one application can be connected to a given serial port at a time. This means that if you are viewing the data with the Serial Monitor you won't be able to recieve it in, for example, Processing. You will need to close one connection to enable the other.</p>
 
-    <h3>Receiving serial data in Processing</h3>
     <p><a href="https://processing.org/" target="_blank" rel="noopener noreferrer">Processing</a> is a popular creative coding platform. It includes a <a href="https://processing.org/reference/libraries/serial/index.html" target="_blank" rel="noopener noreferrer">Serial communication library</a> and is capable of receiving serial data.To enable this functionality in your Processing sketch first you need to verify that the library is installed. This is typically true by default but if you see it missing you can install it via <a href="https://subscription.packtpub.com/book/game-development/9781849517942/1/ch01lvl1sec11/installing-libraries" target="_blank" rel="noopener noreferrer">Processing library manager</a>.</p>
     <img src="img/ProcessingSerialLibraryInstalled.png" alt="dropdown window showing Serial library installed in Processing">
     <p>To use the library we need to add it to our sketch. You can do that by clicking on the name of the library in the dropdown window - this will add the following line to the beginning of your sketch:</p>

@@ -88,7 +88,7 @@ import * as THREE from 'three'
                 </pre>
             </code>
             <p>With that we'll have access to all the components of the standard ThreeJS library. There are some additinal component that we will need to import, but they are already installed in out app folder (in the node_modules section).</p>
-            <p>With this we can implement the most basic scene in ThreeJS. We'll start by steeting up a data object for our window sizes - not strictly necessary, but it will come handy later. Then we'll create a scene and a camera and position the camera a bit up and a bit closer to us. Lastly we'll need to create a renderer that will render the graphics for us and append it to the HTML document.</p>
+            <p>With this we can implement the most basic scene in ThreeJS. We'll start by setting up a data object for our window sizes - not strictly necessary, but it will come handy later. Then we'll create a scene and a camera and position the camera a bit up and a bit closer to us. We'll add the camera as the first component to the scence. Lastly we'll need to create a renderer that will render the graphics for us and append it to the HTML document.</p>
             <code>
                 <pre>
 //scene size
@@ -102,6 +102,7 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera( 75, sizes.width / sizes.height, 0.1, 1000 )
 camera.position.z = 5
 camera.position.y = 2
+scene.add( camera )
 
 //renderer
 const renderer = new THREE.WebGLRenderer()

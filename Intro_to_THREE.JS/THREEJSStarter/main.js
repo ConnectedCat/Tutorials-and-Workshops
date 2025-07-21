@@ -14,6 +14,7 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera( 75, sizes.width / sizes.height, 0.1, 1000 )
 camera.position.z = 5
 camera.position.y = 2
+scene.add( camera )
 
 const ambientLight = new THREE.AmbientLight( 0x404040 ) // soft white light
 scene.add( ambientLight )

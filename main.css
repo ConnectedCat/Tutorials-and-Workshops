@@ -1,0 +1,31 @@
+body {
+    max-width: 1000px;
+    font-family: Inter, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+pre {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 6px;
+
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #032e13;
+    background-color: #f1f1f1;
+    padding-inline: 1ch;
+}
+
+code:has(>pre) {
+    padding-inline: 0;
+}
+
+img {
+    max-width: 500px;
+}
+
+p {
+    line-height: 1.6;
+}

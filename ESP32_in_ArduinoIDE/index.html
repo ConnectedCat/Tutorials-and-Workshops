@@ -8,8 +8,31 @@
     <link rel="stylesheet" href="../main.css">
 </head>
 <body>
-    <h1>Using Periferals with ESP32 Feather</h1>
-    <h2>Servo motor SG92R</h2>
+    <h2>Examples of code for ESP32 in Arduino IDE</h2>
+    <p>Follow the Adafruit <a href="https://learn.adafruit.com/adafruit-esp32-feather/overview">ESP32 Feather guide</a> for more information.</p>
+    <h2>Useful snippets</h2>
+    <h3>Periodic code execution</h3>
+    <code>
+<pre>int period = 4000; //number in milliseconds
+int currRemainder = 0;
+int prevRemainder = 0;
+
+void setup() {
+  // put your setup code here, to run once:
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  currRemainder = millis() % period;
+  if(currRemainder < prevRemainder) {
+    // do the thing!
+  }
+  prevRemainder = currRemainder;
+}</pre>
+    </code>
+
+    <h2>Using Peripherals with ESP32 Feather</h2>
+    <h3>Servo motor SG92R</h3>
     <h4>Arm Sweep</h4>
     <code>
 <pre>#include <ESP32Servo.h>
@@ -49,5 +72,8 @@ void loop() {
         
 </pre>        
     </code>
+
+
+
 </body>
 </html>

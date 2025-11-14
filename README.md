@@ -7,4 +7,4 @@
 - [Intro to ThreeJS](http://connectedcatmedia.com/Tutorials-and-Workshops/Intro_to_THREE.JS/)
 - [Serial Data To and From ESP32 with Arduino IDE](http://connectedcatmedia.com/Tutorials-and-Workshops/Serial_Data_To_and_From_ESP32_with_ArduinoIDE/)
 - [Image Tracking with ARjs and ThreeJS](http://connectedcatmedia.com/Tutorials-and-Workshops/ImageTracking_ThreeJS/)
-- [Using ESP32-HUZZAH32 with periferals](http://connectedcatmedia.com/Tutorials-and-Workshops/ESP32_with_Periferals/)
+- [Using ESP32-HUZZAH32 with periferals](http://connectedcatmedia.com/Tutorials-and-Workshops/ESP32_Periferals_in_ArduinoIDE/)

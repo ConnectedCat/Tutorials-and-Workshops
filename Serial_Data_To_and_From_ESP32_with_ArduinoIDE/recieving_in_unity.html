@@ -11,8 +11,10 @@
     <h1>Receiving serial data in Unity</h1>
 
     <p>Just like we were able to receive the data from the serial port using the Serial Monitor built into ArduinoIDE we can receive it with other application that have the capability. One important thing to remember is that only one application can be connected to a given serial port at a time. This means that if you are viewing the data with the Serial Monitor you won't be able to recieve it in, for example, Unity. You will need to close one connection to enable the other.</p>
-    <p><a href="https://unity.com/" target="_blank" rel="noopener noreferrer">Unity</a> is a popular game development platform. It uses C# as it's main programming language. C# included a powerful <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.ports" target="_blank" rel="noopener noreferrer">Serial communication library</a> and is capable of receiving serial data. To enable this functionality in Unity you must first make sure you're using the correct configuration. In the top menu bar go to Edit -> Project Settings and under Player -> Other settings find Api Compatibility Level and set it to .NET Framework.</p>
+    <p><a href="https://unity.com/" target="_blank" rel="noopener noreferrer">Unity</a> is a popular game development platform. It uses C# as it's main programming language. C# includes a powerful <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.ports" target="_blank" rel="noopener noreferrer">Serial communication library</a> and is capable of receiving serial data. To enable this functionality in Unity you must first make sure you're using the correct configuration. In the top menu bar go to Edit -> Project Settings and under Player -> Other settings find Api Compatibility Level and set it to .NET Framework.</p>
     <img src="img/UnityProjectConfig.png" alt="project settings window showing correct selection in Unity">
+
+    <h3>Basic serial connection</h3>
     <p>To receive serial data we'll need to create a script in Unity and attach it to a game object in the environment. At the top of the script we need to decalare that we'll be using a serial port connection by adding this line:</p>
     <code><pre>using System.IO.Ports;</pre></code>
     <p>We will need to declare a <code>SerialPort</code> object in the code and store a new Serail connection there for access. The object will need the name of the serial port and the baud rate for the speed of communication. We will also need recepticles for the string of characters we'll be receiveing from the serail port and for an array of values we'll get after we parce the string. Place the following code inside your class, before the <code>Start</code> method:</p>
@@ -24,7 +26,9 @@ public string[] values;</pre>
 </code>
     <p>There are several ways to obtain the name of your serial port. You can check the ArduinoIDE setting and copy it from there.</p>
     <img src="img/SerialPortNameInArduinoIDE.png" alt="Serial port name shown in the Arduino IDE settings">
-    <p>This tends to be easier for Windows users, since in that OS the port names assume the format <code>COM*</code>, e.g. COM4. On *nix systems (Mac OS and Linux) the names tend to be longer and more convoluted conforming to the format <code>/dev/cu.*</code> as in the image above. The other parameter that go into the Serial object instantiation is the baud rate <code>9600</code>, which should match the baud rate we established in the code for ESP32.</p>
+    <p>This tends to be easier for Windows users, since in that OS the port names assume the format <code>COM*</code>, e.g. COM4. On *nix systems (Mac OS and Linux) the names tend to be longer and more convoluted conforming to the format <code>/dev/cu.*</code> as in the image above. At the end we'll refactor the code to make it resuable with different serial configurations, but for now you can just copy the name of your port from the ArduinoIDE and paste it into the code.</p>
+        
+    <p>The other parameter that go into the Serial object instantiation is the baud rate <code>9600</code>, which should match the baud rate we established in the code for ESP32.</p>
     
     <p>In the <code>Start</code> method we'll need to open the connection. Please remember that only one serial connection toa serial port is allowed at any time, so check and close Serial Monitor in Arduino IDE or any other connections to your port that might be open.</p>
 <code>
@@ -34,7 +38,8 @@ public string[] values;</pre>
 }
 </pre>    
 </code>
-    <p>If we're only sending and receiving one value the task is trivial - read the value that comes in as a String, convert it whichever format we need and apply it accordingly. In the example below we're using the value of a potentiometer connected to an ESP32 board. In the <code>Update</code> method we first read the line of serial data, terminating at the new line characer. Then we use TryParse method from the integer implementation (we need <code>using System;</code> line to make it work) to attempt to convert the transmission from a string into a number. If the attempt is succcessful  we create a Vector3 from the values and use it to set the scale of the object to which this script is attached.</p>
+    <h3>Receiving one value</h3>
+    <p>If we're only sending and receiving one value the task is relatively simple - read the value that comes in as a String, convert it whichever format we need and apply it accordingly. In the example below we're using the value of a potentiometer connected to an ESP32 board. In the <code>Update</code> method we first read the line of serial data, terminating at the new line characer. Then we use TryParse method from the integer implementation (we need <code>using System;</code> line to make it work) to attempt to convert the transmission from a string into a number. If the attempt is succcessful  we create a Vector3 from the values and use it to set the scale of the object to which this script is attached.</p>
 <code>
 <pre>using System.Collections;
 using System.Collections.Generic;
@@ -67,8 +72,8 @@ public class serialController : MonoBehaviour
     
 </pre>    
 </code>    
-
-<p>In the case when we have 2 or more values coming from the serial port we need to perform a few additional steps. In the example below we'll use the value of a potentiometer (the first value in the message) to set the scale, the value of the button (the second parameter) - to determine whether it will be red or blue, and the value of a photoresistor (the third) - to determine the horizontal position of the circle. We'll split the string from the port into an array of values using the delimiter we established in our code for the ESP32, - in our case ','. Then we will attempt to convert the values into numbers and apply those numbers as intended.</p> 
+    <h3>Receiving multiple values</h3>
+    <p>In the case when we have 2 or more values coming from the serial port we need to perform a few additional steps. In the example below we'll use the value of a potentiometer (the first value in the message) to set the scale, the value of the button (the second parameter) - to determine whether it will be red or blue, and the value of a photoresistor (the third) - to determine the horizontal position of the circle. We'll split the string from the port into an array of values using the delimiter we established in our code for the ESP32, - in our case ','. Then we will attempt to convert the values into numbers and apply those numbers as intended.</p> 
 <code>
 <pre>using System.Collections;
 using System.Collections.Generic;
@@ -119,6 +124,155 @@ public class serialController : MonoBehaviour
     }
 }    
 </pre>
+</code>
+    <h3>Using Mathematics library to process data</h3>
+    <p>The Mathematics library in Unity provides a set of functions for performing mathematical operations. One such operation that will be useful to us is the <code>math.remap</code> function which allows us to map a value from one range to another. The values sent from the ESP32 come in a range from 0 to 4095. This means that without the remapping we would, for example, scale our object between 0 meters and over 4 kilometers. This is unlikely to be useful, and the situation is similar for other parameters as well.</p>
+
+    <p>We will start by adding the line:</p>
+<code><pre>using Unity.Mathematics;</pre></code>
+    <p>at the top of our script to enable the use of the Mathematics library. Then we can use the <code>math.remap</code> function to remap the values like so:</p>
+<code>
+<pre>scaleValue = math.remap(0f, 4095f, 0.1f, 3f, scaleValue);</pre>
+</code>
+    <p>This is obviosly a more reasonable range for scaling our object - from 10 centimeters to 3 meters. Notice that the function operates on floating-point values, and in the example it stores the product in the variable <code>scaleValue</code>. To implement this wwe need to re-factor our code a bit. While doing so we will also try to make it more flexible, robust and readable.</p>
+
+    <h3>Refactoring the code</h3>
+    <p>Let's start by adding serialized fields at the top of the script to create the GUI components allowing the user to change the values for the serial port name and the baud rate without having to modify the code directly. This code will go at the very top of the class, replaing our previous <code>SerialPort connection ..... </code> line. Then we will declare the SerialPort object without instantiating it, and we'll instantiate it in the Start method using the values from the serialized fields. We will also add a variable for the renderer that we'll be using to change the color of our object.</p>
+
+<code>
+<pre>[Header("Serial")]
+[SerializeField] private string portName = "Name of your serial port";
+[SerializeField] private int baudRate = 9600;
+private SerialPort connection;
+private Renderer cachedRenderer;
+</pre>
+</code>
+    <p>In the <code>Start</code> method, we will initialize the <code>connection</code> and <code>cachedRenderer</code> variables. Notice the use of <code>try-catch</code> structure, it will allow us to fail gracefully if the serial port cannot be opened.</p>
+<code>
+<pre>private void Start()
+{
+    cachedRenderer = GetComponent<Renderer>();
+
+    try
+    {
+        connection = new SerialPort(portName, baudRate);
+        connection.ReadTimeout = 5;
+        connection.Open();
+        Debug.Log($"Connected to serial: {portName}");
+    }
+    catch (Exception e)
+    {
+        Debug.LogError($"Could not open serial port {portName}: {e.Message}");
+    }
+}</pre>
+</code>
+    <p>We will introduce a few more safeguard in the <code>Update</code> method. We'll be checking if the connection is open before attempting to read from it; we will use the <code>try-catch</code> structure to handle any exceptions that may occur. We will also add a <code>Trim()</code> funtion to clean up the recived data string from the trailing End-Of-Line character. We will add a check to ensure that we're receiving the correct number of values - 3 in our example.</p>
+    <p>Finally, we will parce the recived values into floats and return out of the method if the parsing fails. I also expanded some of the code to make it more readable. One possible exception to this improved readability might be a potentially unfamiliar <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator" target="_blank" rel="noopener noreferrer">ternary operator in the folloing line:</a></p>
+<code><pre>cachedRenderer.material.color = (colorToggle == 1) ? Color.blue : Color.red;</pre></code>
+    <p>You can think of it as a shorthand for an if-else statement.</p>
+    <p>The last step in our refactor is to release the serial port connection in the OnDestroy method when our program stops running. This will ensure that the port is properly closed and resources are freed for the use by other programs. With those adjustments the code looks like this:</p>
+<code>
+<pre>using System;
+using System.Globalization;
+using System.IO.Ports;
+using UnityEngine;
+using Unity.Mathematics;
+
+public class serialController : MonoBehaviour
+{
+    [Header("Serial")]
+    [SerializeField] private string portName = "/dev/cu.usbserial-024797ED";
+    [SerializeField] private int baudRate = 115200;
+
+    private SerialPort connection;
+    private Renderer cachedRenderer;
+
+    private void Start()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+
+        try
+        {
+            connection = new SerialPort(portName, baudRate);
+            connection.ReadTimeout = 5;
+            connection.Open();
+            Debug.Log($"Connected to serial: {portName}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Could not open serial port {portName}: {e.Message}");
+        }
+    }
+    //End of Start()
+
+    private void Update()
+    {
+        if (connection == null || !connection.IsOpen)
+        {
+            return;
+        }
+
+        try
+        {
+            string dataString = connection.ReadLine().Trim();
+            string[] values = dataString.Split(',');
+
+            if (values.Length != 3)
+            {
+                return;
+            }
+
+            if (!float.TryParse(values[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float xPosition))
+            {
+                return;
+            }
+
+            if (!float.TryParse(values[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float scaleValue))
+            {
+                return;
+            }
+
+            int colorToggle = ( values[2].Trim() == "1" ) ? 1 : 0;
+
+            Debug.Log($"Received from serial: x={xPosition}, scale={scaleValue}, colorToggle={colorToggle}");
+            xPosition = math.remap(0f, 4095f, -10f, 10f, xPosition);
+            Vector3 p = transform.position;
+            p.x = xPosition;
+            transform.position = p;
+
+            scaleValue = math.remap(0f, 4095f, 0.1f, 3f, scaleValue);
+            transform.localScale = Vector3.one * scaleValue;
+
+            if (cachedRenderer != null)
+            {
+                cachedRenderer.material.color = (colorToggle == 1) ? Color.blue : Color.red;
+            }
+        }
+        catch (TimeoutException)
+        {
+            // No serial line ready this frame.
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Serial parse/read issue: {e.Message}");
+        }
+    }
+    //End of Update()
+
+    private void OnDestroy()
+    {
+        if (connection != null)
+        {
+            if (connection.IsOpen)
+            {
+                connection.Close();
+            }
+
+            connection.Dispose();
+            connection = null;
+        }
+    }
+}</pre>
 </code>
 
 </body>

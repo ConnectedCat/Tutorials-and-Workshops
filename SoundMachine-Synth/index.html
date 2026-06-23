@@ -20,6 +20,122 @@
     <h2>Phase 1: Sound Machine</h2>
     <p>We will start by building a basic interface with 4 buttons that would trigger different sounds. We will also need some range sensors, like potentiometers, for controlling various sound parameters. The following schematic shows the configurations with 4 buttons and 3 potentiometers, but you can modify it by replacing them with other types of sensors.</p>
     <img src="img/SoundMachineConfigWithHUZZAH32_bb.png" alt="Breadboard schematic showing 4 buttons and 3 potentiometers connected to an ESP32 HUZZAH32 board" />
-    
+    <p>This tutorial focuses on the electronics and software aspects of building the sound machine, but I would ncourage you to put some thought into the design of the enclosre and the interface.</p>
+    <h3>The code for the ESP32</h3>
+    <p>The following code assumes that you have already configured your ESP32 with Arduino IDE. If you need help doing that I recommend following the official tutorial from the Adafruit website: <a href="https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/using-with-arduino-ide" target="_blank" rel="noopener noreferrer">ESP32 with Arduino IDE</a>. Also make sure that the connections are following the diagram above. Beyond that the code is relatively simple and should be familiar to you if you've sent serial communication from ESP32 to your computer before.</p>
+    <code>
+<pre>#define POT1 A0
+#define POT2 A1
+#define POT3 A2
+#define BUTTON1 21
+#define BUTTON2 12
+#define BUTTON3 27
+#define BUTTON4 33
+
+void setup() {
+    pinMode(BUTTON1, INPUT);
+    pinMode(BUTTON2, INPUT);
+    pinMode(BUTTON3, INPUT);
+    pinMode(BUTTON4, INPUT);
+    pinMode(POT1, INPUT);
+    pinMode(POT2, INPUT);
+    pinMode(POT3, INPUT);
+
+    Serial.begin(9600);
+    while (!Serial);
+}
+
+void loop() {
+    Serial.print(analogRead(POT1));
+    Serial.print(',');
+    Serial.print(analogRead(POT2));
+    Serial.print(',');
+    Serial.print(analogRead(POT3));
+    Serial.print(',');
+    Serial.print(digitalRead(BUTTON1));
+    Serial.print(',');
+    Serial.print(digitalRead(BUTTON2));
+    Serial.print(',');
+    Serial.print(digitalRead(BUTTON3));
+    Serial.print(',');
+    Serial.println(digitalRead(BUTTON4));
+    delay(10);
+}
+</pre>
+    </code>
+    <p>The code is very simple and should be easy to ready, but the basic overview if you need a bit of help. We define our pins as connected to the sensors (buttons and potentiometers); in the setup function, we initialize the serial communication and set the pin modes to INPUT, since this is how we'll be using them. In the loop function, we read the values from the sensors and print them to the serial monitor using commas as separators. Notice that we use the <code>analogRead</code> function to read the values from the potentiometers and the <code>digitalRead</code> function to read the values from the buttons. The lat print statement is adding a new line character as a transmission terminotor, to signify the end of this chank of values.</p>
+
+    <h3>Sound playback machine</h3>
+    <p>The Processing sketch will sit on the receiving end of this transmission and process the incoming sensor data to play the sound. For this example I will be using an open source library of pre-recorded sounds from a <a href="https://en.wikipedia.org/wiki/Roland_TR-909 target="_blank" rel="noopener noreferrer">Roland 909 drum machine</a>. You can download the library from <a href="TR909all.zip">this link</a>. The playback is enabled by the processing <a href="https://processing.org/reference/libraries/sound/index.html" target="_blank" rel="noopener noreferrer">Sound library</a> which needs to be imported into the sketch along with the <a href="https://processing.org/reference/libraries/serial/index.html" target="_blank" rel="noopener noreferrer">Serial library</a>. Some processing distributions do not include the Sound library by default, so you may need to install it separately. For more details on this process please refer to <a href="https://happycoding.io/tutorials/processing/libraries" target="_blank" rel="noopener noreferrer">this tutorial</a>.</p>
+    <p>For the sample playback machine we will be using objects of a class <a href="https://processing.org/reference/libraries/sound/SoundFile.html" target="_blank" rel="noopener noreferrer">SoundFile</a>. This usage will be illustrated in the linked example, but there is one caveat: multiple file can be played back simultaneously, which is not how a sound/drum machine would typically operates. Which means that we'll need to stop the playback of the previous sound before playing a new one, otherwise the sounds we rick an unpleasant cacophony. The code below demonstrates how to load and play the SoundFiles by clicking the mouse on the on-screen buttons. This will allow us to text the playback functionality befoe we connect it to the serial data from the ESP32.</p>
+    <p>If you don't have previous experince loading external files into Processing the following image will illustrate the data structure we need to achieve. Files (in this case .wav files) will be stored in a folder named "data" within the Processing sketch folder. This will allow the sketch to acces them without aditional configuration or path segments.</p>
+    <img src="img/ProcessingDataStructure.png" alt="Processing sketch folder structure showing the data folder with .wav files" />
+    <p>Pay attention to the spelling of the file names to make sure they are loaded correctly.</p>
+<code>
+    <pre>import processing.sound.*;
+SoundFile[] myDrums = new SoundFile[4];
+
+float circleRadius = 60;
+
+void setup(){
+  size(660, 200);
+  
+  //kick drum:
+  myDrums[0] = new SoundFile(this, "BT7AADA.WAV");
+  //snare drum
+  myDrums[1] = new SoundFile(this, "ST7T3SA.WAV");
+  //closed hat
+  myDrums[2] = new SoundFile(this, "HHCD4.WAV");
+  //open hat
+  myDrums[3] = new SoundFile(this, "HHODA.WAV");
+}
+
+void draw(){
+  background(0);
+  //kick
+  fill(255, 0, 0);
+  ellipse(100, 100, circleRadius*2, circleRadius*2);
+  
+  //snare
+  fill(0, 255, 0);
+  ellipse(250, 100, circleRadius*2, circleRadius*2);
+  
+  //closed hat
+  fill(0, 0, 255);
+  ellipse(400, 100, circleRadius*2, circleRadius*2);
+  
+  //open hat
+  fill(255, 0, 255);
+  ellipse(550, 100, circleRadius*2, circleRadius*2);
+}
+
+void mouseReleased(){
+  if(dist(100, 100, mouseX, mouseY) < circleRadius){
+    for(SoundFile d : myDrums){
+      d.stop();
+    }
+    myDrums[0].play();
+  }
+  else if(dist(250, 100, mouseX, mouseY) < circleRadius){
+    for(SoundFile d : myDrums){
+      d.stop();
+    }
+    myDrums[1].play();
+  }
+  else if(dist(400, 100, mouseX, mouseY) < circleRadius){
+    for(SoundFile d : myDrums){
+      d.stop();
+    }
+    myDrums[2].play();
+  }
+  else if(dist(550, 100, mouseX, mouseY) < circleRadius){
+    for(SoundFile d : myDrums){
+      d.stop();
+    }
+    myDrums[3].play();
+  }
+}</pre>
+</code>
+<p>Now we are ready to connect our sound machine to the ESP32 and start receiving serial data to trigger the sounds.</p>
 </body>
 </html>

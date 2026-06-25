@@ -23,6 +23,7 @@
     <p>This tutorial focuses on the electronics and software aspects of building the sound machine, but I would ncourage you to put some thought into the design of the enclosre and the interface.</p>
     <h3>The code for the ESP32</h3>
     <p>The following code assumes that you have already configured your ESP32 with Arduino IDE. If you need help doing that I recommend following the official tutorial from the Adafruit website: <a href="https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/using-with-arduino-ide" target="_blank" rel="noopener noreferrer">ESP32 with Arduino IDE</a>. Also make sure that the connections are following the diagram above. Beyond that the code is relatively simple and should be familiar to you if you've sent serial communication from ESP32 to your computer before.</p>
+    <p>We define our pins as connected to the sensors (buttons and potentiometers); in the setup function, we initialize the serial communication and set the pin modes to INPUT, since this is how we'll be using them. In the loop function, we read the values from the sensors and send them as text through the serial connection using commas as separators. Notice that we use the <code>analogRead</code> function to read the values from the potentiometers and the <code>digitalRead</code> function to read the values from the buttons. The last print statement is adding a new line character as a transmission terminator, to signify the end of this chunk of values.</p>
     <code>
 <pre>#define POT1 A0
 #define POT2 A1
@@ -63,14 +64,20 @@ void loop() {
 }
 </pre>
     </code>
-    <p>The code is very simple and should be easy to ready, but the basic overview if you need a bit of help. We define our pins as connected to the sensors (buttons and potentiometers); in the setup function, we initialize the serial communication and set the pin modes to INPUT, since this is how we'll be using them. In the loop function, we read the values from the sensors and print them to the serial monitor using commas as separators. Notice that we use the <code>analogRead</code> function to read the values from the potentiometers and the <code>digitalRead</code> function to read the values from the buttons. The lat print statement is adding a new line character as a transmission terminotor, to signify the end of this chank of values.</p>
+    <p>Again, if you're having trouble with this please review the foundations of serial communication from this set of tutorials: <a href="//connectedcatmedia.com/Tutorials-and-Workshops/Serial_Data_To_and_From_ESP32_with_ArduinoIDE/" target="_blank" rel="noopener noreferrer">Serial Data To and From ESP32 with Arduino IDE</a>.</p>
 
     <h3>Sound playback machine</h3>
     <p>The Processing sketch will sit on the receiving end of this transmission and process the incoming sensor data to play the sound. For this example I will be using an open source library of pre-recorded sounds from a <a href="https://en.wikipedia.org/wiki/Roland_TR-909 target="_blank" rel="noopener noreferrer">Roland 909 drum machine</a>. You can download the library from <a href="TR909all.zip">this link</a>. The playback is enabled by the processing <a href="https://processing.org/reference/libraries/sound/index.html" target="_blank" rel="noopener noreferrer">Sound library</a> which needs to be imported into the sketch along with the <a href="https://processing.org/reference/libraries/serial/index.html" target="_blank" rel="noopener noreferrer">Serial library</a>. Some processing distributions do not include the Sound library by default, so you may need to install it separately. For more details on this process please refer to <a href="https://happycoding.io/tutorials/processing/libraries" target="_blank" rel="noopener noreferrer">this tutorial</a>.</p>
-    <p>For the sample playback machine we will be using objects of a class <a href="https://processing.org/reference/libraries/sound/SoundFile.html" target="_blank" rel="noopener noreferrer">SoundFile</a>. This usage will be illustrated in the linked example, but there is one caveat: multiple file can be played back simultaneously, which is not how a sound/drum machine would typically operates. Which means that we'll need to stop the playback of the previous sound before playing a new one, otherwise the sounds we rick an unpleasant cacophony. The code below demonstrates how to load and play the SoundFiles by clicking the mouse on the on-screen buttons. This will allow us to text the playback functionality befoe we connect it to the serial data from the ESP32.</p>
-    <p>If you don't have previous experince loading external files into Processing the following image will illustrate the data structure we need to achieve. Files (in this case .wav files) will be stored in a folder named "data" within the Processing sketch folder. This will allow the sketch to acces them without aditional configuration or path segments.</p>
+    
+    <p>For this example we'll select 4 drum sounds from the library - feel free to pick any you like - and copy them into the "data" folder within the Processing sketch folder. If you don't have previous experince loading external files into Processing the following image will illustrate the data structure we need to achieve. Files (in this case .wav files) will be stored in a folder named "data" within the Processing sketch folder. This will allow the sketch to acces them without aditional configuration or path segments.</p>
     <img src="img/ProcessingDataStructure.png" alt="Processing sketch folder structure showing the data folder with .wav files" />
-    <p>Pay attention to the spelling of the file names to make sure they are loaded correctly.</p>
+    <p>Pay attention to the spelling of the file names in your code to make sure they are loaded correctly.</p>
+
+    <p>For the sample playback machine we will be using objects of a class <a href="https://processing.org/reference/libraries/sound/SoundFile.html" target="_blank" rel="noopener noreferrer">SoundFile</a>. This usage will be illustrated in the linked example, but there is one caveat: multiple file can be played back simultaneously, which is not how a sound/drum machine would typically operates. Which means that we'll need to stop the playback of the previous sound before playing a new one, otherwise the sounds we rick an unpleasant cacophony.</p>
+    
+    <p>The code below demonstrates how to load and play the SoundFiles by clicking the mouse on the on-screen buttons. This will allow us to test the playback functionality before we connect it to the serial data from the ESP32. So in the <code>setup()</code> function we'll load the 4 new SoundFile objects into an array called <code>myDrums</code>. Then in the <code>draw()</code> function we'll draw the buttons to be clicked with a mouse. Finally, in the <code>mouseReleased()</code> function we'll trigger the playback of the selected sound. Notice that we stop the playback of the previous sound before playing a new one. If you have additional questions about this code I recommend leveling up before the rest of the rest of the tutorail by reviewing <a href="https://processing.org/reference" target="_blank" rel="noopener noreferrer">the Processing documentation</a> and the ever helpful <a href="https://youtu.be/4JzDttgdILQ?si=HeYKZVQehqE9hJm0" target="_blank" rel="noopener noreferrer">Coding Train YouTube Channel</a>.</p>
+    
+    
 <code>
     <pre>import processing.sound.*;
 SoundFile[] myDrums = new SoundFile[4];
@@ -136,6 +143,124 @@ void mouseReleased(){
   }
 }</pre>
 </code>
-<p>Now we are ready to connect our sound machine to the ESP32 and start receiving serial data to trigger the sounds.</p>
+<p>Now we are ready to connect our sound machine to the ESP32 and start receiving serial data to trigger the sounds. This will replace the mouse click functionality with serial communication, which will free up the Processing window for display. Feel free to experiement with the type of visual information you'd want to display. It could be a range between a strictly utilitarial listing of data parameters to a trippy sound visualization. Designer's choice!</p>
+<p>As before, we will import the serial library, and use <code>serialEvent()</code> function to handle the incoming serial data. The details of this functionality are covered in the <a href="https://processing.org/reference/libraries/serial/Serial_serialEvent_.html" target="_blank" rel="noopener noreferrer">Serial Library documentation</a>. Another place to find information about this implementation is again in the <a href="//connectedcatmedia.com/Tutorials-and-Workshops/Serial_Data_To_and_From_ESP32_with_ArduinoIDE/" target="_blank" rel="noopener noreferrer">previous tutorials on serial communication</a>. Now our <code>setup()</code> and <code>draw()</code> functions look like this:</p>
+<code>
+<pre>import processing.sound.*;
+import processing.serial.*;
+
+SoundFile[] myDrums = new SoundFile[4];
+Serial myConnection;
+void setup(){
+  size(660, 200);
+  
+  //kick drum:
+  myDrums[0] = new SoundFile(this, "BT7AADA.WAV");
+  //snare drum
+  myDrums[1] = new SoundFile(this, "ST7T3SA.WAV");
+  //closed hat
+  myDrums[2] = new SoundFile(this, "HHCD4.WAV");
+  //open hat
+  myDrums[3] = new SoundFile(this, "HHODA.WAV");
+
+  myConnection = new Serial(this, Serial.list()[1], 9600);
+  //make sure the number of your serial port is correct and that the baud rate matches the one in your ESP32 code
+  myConnection.bufferUntil('\n');
+}
+
+void draw(){
+  //feel free to add visualizations here, or just leave it blank
+}</pre>
+</code>
+<p>We're update the sound playback mechanics to allow us simultaneously play multiple sounds - not something we could have dove with a mouse, but now the buttons allow us to do this!</p>
+<code>
+<pre>void serialEvent(Serial conn){
+  String incoming = conn.readString();
+  String[] values = split(trim(incoming), ',');
+  printArray(values);
+  //make sure this number matches the number of values you're sending via serial:
+  if(values.length == 7){
+    if(float(values[0]) > 0){
+      if(!myDrums[0].isPlaying()){
+        myDrums[0].play();
+      }
+    }
+    if(float(values[1]) > 0){
+      if(!myDrums[1].isPlaying()){
+        myDrums[1].play();
+      }
+    }
+    if(float(values[2]) > 0){
+      if(!myDrums[2].isPlaying()){
+        myDrums[2].play();
+      }
+    }
+    if(float(values[3]) > 0){
+      if(!myDrums[3].isPlaying()){
+        myDrums[3].play();
+      }
+    }
+  } //end of value number check
+}</pre>
+</code>
+<p>Unfortunately, another issue comes up - if you press and hold a button the sounds will continue re-triggering over and over. This might be a desirable feature, and some drum machine include this as an options, but it can also inhibit the performance if you want to play the machine live. To address this we will set a set of flags to track the state of each sound. This will allow us to track whether the button was pressed and sounds triggered - but has not been released yet. Only after the button is released will the sound be allowed to play again. Add the declaration of the <code>drumFlags</code> array to the top of your sketch:</p>
+<code>
+    <pre>import processing.sound.*;
+import processing.serial.*;
+
+SoundFile[] myDrums = new SoundFile[4];
+boolean[] drumFlags = {true, true, true, true};
+
+Serial myConnection;</pre>
+</code>
+<p>Then update the <code>serialEvent()</code> function to check the state of the flags before triggering the sound:</p>
+<code>
+<pre>void serialEvent(Serial conn){
+  String incoming = conn.readString();
+  String[] values = split(trim(incoming), ',');
+  printArray(values);
+  //make sure this number matches the number of values you're sending via serial:
+  if(values.length == 7){
+    if(float(values[0]) > 0){
+      if(!myDrums[0].isPlaying() && drumFlags[0]){
+        myDrums[0].play();
+        drumFlags[0] = false;
+      }
+    }
+    else {
+      drumFlags[0] = true;
+    }
+    if(float(values[1]) > 0){
+      if(!myDrums[1].isPlaying() && drumFlags[1]){
+        myDrums[1].play();
+        drumFlags[1] = false;
+      }
+    }
+    else {
+      drumFlags[1] = true;
+    }
+    if(float(values[2]) > 0){
+      if(!myDrums[2].isPlaying() && drumFlags[2]){
+        myDrums[2].play();
+        drumFlags[2] = false;
+      }
+    }
+    else {
+      drumFlags[2] = true;
+    }
+    if(float(values[3]) > 0){
+      if(!myDrums[3].isPlaying() && drumFlags[3]){
+        myDrums[3].play();
+        drumFlags[3] = false;
+      }
+    }
+    else {
+      drumFlags[3] = true;
+    }  
+  } //end of value number check
+}</pre>
+</code>
+<p>Now you will notice that that only if a give sound is not currently playing and its flag is true, it will be triggered on a button press (if value greater than 0). The <code>else</code> statements reset the flags when the button is released.</p>
+<p>Note: I know that the code is getting a bit long, and that are multiple ways to refactor it, but I am hoping that this format will provide better clarity.</p>
 </body>
 </html>

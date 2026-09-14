@@ -9,4 +9,4 @@
 - [Image Tracking with ARjs and ThreeJS](//connectedcatmedia.com/Tutorials-and-Workshops/ImageTracking_ThreeJS/)
 - [Using ESP32-HUZZAH32 with periferals](//connectedcatmedia.com/Tutorials-and-Workshops/ESP32_Periferals_in_ArduinoIDE/)
 - [Sound machine/subtractive synth built with ESP32 and Processing](//connectedcatmedia.com/Tutorials-and-Workshops/SoundMachine-Synth/)
-- [Set-up a local LLM on your computer](//connectedcatmedia.com//SetUp_a_local_LLM/)
+- [Set-up a local LLM on your computer](//connectedcatmedia.com/Tutorials-and-Workshops/SetUp_a_local_LLM/)
